@@ -7,6 +7,7 @@ TestModel は実際のLLMを呼ばない偽モデルで、登録されたツー�
 
 from pydantic_ai.messages import ToolCallPart, ToolReturnPart
 from pydantic_ai.models.test import TestModel
+from pydantic_ai.tools import DeferredToolRequests
 
 from app.agent import agent
 
@@ -27,7 +28,13 @@ def test_base_tools_are_registered_and_called():
 
     called = {p.tool_name for p in _parts(result, ToolCallPart)}
     assert BASE_TOOLS <= called
-    assert len(_parts(result, ToolReturnPart)) == len(_parts(result, ToolCallPart))
+    if isinstance(result.output, DeferredToolRequests):
+        assert {p.tool_name for p in result.output.approvals} == {"save_learning_log"}
+        assert len(_parts(result, ToolReturnPart)) + len(result.output.approvals) == len(
+            _parts(result, ToolCallPart)
+        )
+    else:
+        assert len(_parts(result, ToolReturnPart)) == len(_parts(result, ToolCallPart))
     assert result.output
 
 
