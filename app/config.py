@@ -22,6 +22,14 @@ RAG_TOP_K = 5
 GRAPH_START_K = 3
 GRAPH_HOPS = 2
 GRAPH_MAX_RESULTS = 10
+# 第5回 宿題(発展): BM25とベクトル検索のハイブリッド＋リランク
+HYBRID_CANDIDATES = 20   # ベクトル・BM25がそれぞれ出す候補数
+HYBRID_TOP_K = 5         # 最終的にモデルへ返すページ数
+HYBRID_RRF_K = 60        # Reciprocal Rank Fusionの定数
+HYBRID_RERANK = True     # 並べ替えにLLMを使うか
+# 宿題(発展) 最終構成: ハイブリッドで入口→Graphで拡張→リランク→前後ページを追加
+PIPELINE_TOP_K = 4       # リランク後に残すページ数
+PIPELINE_NEIGHBOR_TOP = 2  # 上位何ページの前後1ページを追加するか
 EMBEDDING_MODEL = "gemini-embedding-001"
 EMBEDDING_DIMENSIONS = 768
 # 2,048トークンの上限に対し、タスク指定等の分を残す。超過時は切り捨てず停止する。

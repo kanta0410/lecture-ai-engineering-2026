@@ -175,3 +175,37 @@ def search_graph(query: str) -> str:
         return json.dumps({"error": str(e)}, ensure_ascii=False)
     except APIError as e:
         return json.dumps({"error": api_error_message(e.code)}, ensure_ascii=False)
+
+
+def search_hybrid(query: str) -> str:
+    """ベクトル検索とキーワード検索(BM25)を合成し、並べ替えた関連ページの本文・引用情報を返す。
+
+    queryに調べたい内容を指定する。用語の名前も意味も使って探すので、LoRAのような固有名詞を含む質問に向く。
+    """
+    import sqlite3
+    from google.genai.errors import APIError
+    from app.retrieval import search_hybrid as search
+
+    try:
+        return json.dumps({"results": search(query)}, ensure_ascii=False)
+    except (ValueError, FileNotFoundError, sqlite3.Error) as e:
+        return json.dumps({"error": str(e), "results": []}, ensure_ascii=False)
+    except APIError as e:
+        return json.dumps({"error": api_error_message(e.code), "results": []}, ensure_ascii=False)
+
+
+def search_pipeline(query: str) -> str:
+    """意味検索とキーワード検索で入口を決め、関連ページをたどって並べ替え、上位ページの前後も付けて返す。
+
+    queryに調べたい内容を指定する。roleが"hit"は上位の根拠候補、"neighbor"はその前後ページ。
+    """
+    import sqlite3
+    from google.genai.errors import APIError
+    from app.retrieval import search_pipeline as search
+
+    try:
+        return json.dumps({"results": search(query)}, ensure_ascii=False)
+    except (ValueError, OSError, sqlite3.Error) as e:
+        return json.dumps({"error": str(e), "results": []}, ensure_ascii=False)
+    except APIError as e:
+        return json.dumps({"error": api_error_message(e.code), "results": []}, ensure_ascii=False)
